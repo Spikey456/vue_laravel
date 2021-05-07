@@ -1842,7 +1842,9 @@ module.exports = {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
 /**
  * First we will load all of this project's JavaScript dependencies which
  * includes Vue and other libraries. It is a great starting point when
@@ -1850,8 +1852,6 @@ __webpack_require__.r(__webpack_exports__);
  */
 
 
-var _require = __webpack_require__(/*! axios */ "./node_modules/axios/index.js"),
-    Axios = _require["default"];
 
 __webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js");
 /**
@@ -1872,82 +1872,109 @@ __webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js");
  */
 
 
-vue__WEBPACK_IMPORTED_MODULE_0__.default.component('modal', {
+vue__WEBPACK_IMPORTED_MODULE_1__.default.component('modal', {
   template: '#modal-template'
 });
-var app = new vue__WEBPACK_IMPORTED_MODULE_0__.default({
+var app = new vue__WEBPACK_IMPORTED_MODULE_1__.default({
   el: '#app',
   data: {
-    newCar: {
-      'make': '',
-      'model': ''
+    newItem: {
+      'prod_name': '',
+      'price': 0,
+      'qty': 0,
+      'total_price': 0
     },
     hasError: true,
-    cars: [],
+    items: [],
+    total_amount: 0,
     e_id: '',
-    e_make: '',
-    e_model: ''
+    e_prod_name: '',
+    e_price: 0,
+    e_qty: 0,
+    e_total_price: 0
   },
   mounted: function mounted() {
-    this.getCars();
+    this.getItems();
   },
   methods: {
-    getCars: function getCars() {
+    computeTotal: function computeTotal() {
       var _this = this;
 
-      axios.get('/getCars').then(function (response) {
-        _this.cars = response.data;
+      var total = 0;
+
+      for (var i = 0; i < _this.items.length; i++) {
+        total += _this.items[i].total_price;
+      }
+
+      console.log(total);
+      _this.total_amount = total;
+    },
+    getItems: function getItems() {
+      var _this = this;
+
+      axios__WEBPACK_IMPORTED_MODULE_0___default().get('/getItems').then(function (response) {
+        _this.items = response.data;
+        _this.total_amount = 0;
       })["catch"](function (error) {
         console.log("Get All: " + error);
       });
     },
-    createCar: function createCar() {
-      var input = this.newCar;
+    createItem: function createItem() {
+      var input = this.newItem;
+      console.log('CLICKED');
 
       var _this = this;
 
-      if (input['make'] == '' || input['model'] == '') {
+      if (input['prod_name'] == '' || input['price'] == 0 || input['qty'] == 0) {
         this.hasError = false;
       } else {
         this.hasError = true;
-        axios.post('/storeCar', input).then(function (response) {
-          _this.newCar = {
-            'make': '',
-            'model': ''
+        input['total_price'] = input['price'] * input['qty'];
+        console.log(input);
+        axios__WEBPACK_IMPORTED_MODULE_0___default().post('/storeItem', input).then(function (response) {
+          _this.newItem = {
+            'prod_name': '',
+            'price': 0,
+            'qty': 0
           };
 
-          _this.getCars();
+          _this.getItems();
         })["catch"](function (error) {
           console.log("Insert: " + error);
         });
       }
     },
-    deleteCar: function deleteCar(car) {
+    deleteItem: function deleteItem(item) {
       var _this = this;
 
-      axios.post('/deleteCar/' + car.id).then(function (response) {
-        _this.getCars();
+      axios__WEBPACK_IMPORTED_MODULE_0___default().post('/deleteItem/' + item.id).then(function (response) {
+        _this.getItems();
       })["catch"](function (error) {
-        console.log("Delete car: " + error);
+        console.log("Delete item: " + error);
       });
     },
-    setVal: function setVal(val_id, val_make, val_model) {
+    setVal: function setVal(val_id, val_prod_name, val_price, val_qty) {
       this.e_id = val_id;
-      this.e_make = val_make;
-      this.e_model = val_model;
+      this.e_prod_name = val_prod_name;
+      this.e_price = val_price;
+      this.e_qty = val_qty;
     },
-    editCar: function editCar() {
+    editItem: function editItem() {
       var _this = this;
 
       var id_val_1 = document.getElementById('e_id');
-      var make_val_1 = document.getElementById('e_make');
-      var model_val_1 = document.getElementById('e_model');
+      var prod_name_val_1 = document.getElementById('e_prod_name');
+      var price_val_1 = document.getElementById('e_price');
+      var qty_val_1 = document.getElementById('e_qty');
+      var total_price_val_1 = price_val_1.value * qty_val_1.value;
       var model = document.getElementById('myModal').value;
-      axios.post('/editCars/' + id_val_1.value, {
-        val_1: make_val_1.value,
-        val_2: model_val_1.value
+      axios__WEBPACK_IMPORTED_MODULE_0___default().post('/editItem/' + id_val_1.value, {
+        val_1: prod_name_val_1.value,
+        val_2: price_val_1.value,
+        val_3: qty_val_1.value,
+        val_4: total_price_val_1
       }).then(function (response) {
-        _this.getCars();
+        _this.getItems();
       });
     }
   }
@@ -49438,6 +49465,18 @@ Vue.compile = compileToFunctions;
 /******/ 				}
 /******/ 			}
 /******/ 			return result;
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/compat get default export */
+/******/ 	(() => {
+/******/ 		// getDefaultExport function for compatibility with non-harmony modules
+/******/ 		__webpack_require__.n = (module) => {
+/******/ 			var getter = module && module.__esModule ?
+/******/ 				() => (module['default']) :
+/******/ 				() => (module);
+/******/ 			__webpack_require__.d(getter, { a: getter });
+/******/ 			return getter;
 /******/ 		};
 /******/ 	})();
 /******/ 	

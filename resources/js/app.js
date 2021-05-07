@@ -4,7 +4,7 @@
  * building robust, powerful web applications using Vue and Laravel.
  */
 import Vue from 'vue';
- const { default: Axios } = require('axios');
+import axios from 'axios';
 
  require('./bootstrap');
 
@@ -35,63 +35,83 @@ import Vue from 'vue';
  const app = new Vue({
      el: '#app',
      data: {
-         newCar: {'make': '', 'model': ''},
+         newItem: {'prod_name': '', 'price': 0, 'qty': 0, 'total_price': 0},
          hasError: true,
-         cars: [],
+         items: [],
+         total_amount: 0,
          e_id: '',
-         e_make: '',
-         e_model: '',
+         e_prod_name: '',
+         e_price: 0,
+         e_qty: 0,
+         e_total_price: 0,
      },
      mounted: function mounted(){
-         this.getCars();
+         this.getItems();
      },
      methods: {
-         getCars: function getCars(){
+         computeTotal: function computeTotal(){
+            var _this = this;
+            let total = 0;
+            for (var i = 0; i < _this.items.length; i++) {
+               total += _this.items[i].total_price;
+             }
+            console.log(total)
+
+            _this.total_amount = total
+         },
+         getItems: function getItems(){
              var _this = this;
-             axios.get('/getCars').then(function(response){
-                 _this.cars = response.data;
+             axios.get('/getItems').then(function(response){
+                 _this.items = response.data;
+                 _this.total_amount = 0;
              }).catch(error=>{
                  console.log("Get All: "+error);
              });
          },
-         createCar: function createCar() {
-             var input = this.newCar;
+         createItem: function createItem() {
+             var input = this.newItem;
+             console.log('CLICKED')
              var _this = this;
-             if(input['make'] == '' || input['model'] == '') {
+             if(input['prod_name'] == '' || input['price'] == 0 || input['qty'] == 0) {
                  this.hasError = false;
              }
              else {
                  this.hasError= true;
-                 axios.post('/storeCar', input).then(function(response){
-                     _this.newCar = {'make': '', 'model': ''}
-                     _this.getCars();
+                 input['total_price'] = input['price'] * input['qty'] 
+                 console.log(input)
+                 axios.post('/storeItem', input).then(function(response){
+                     _this.newItem = {'prod_name': '', 'price': 0, 'qty': 0}
+                     _this.getItems();
                  }).catch(error=>{
                      console.log("Insert: "+error);
                  });
              }
          },
-         deleteCar: function deleteCar(car) {
+         deleteItem: function deleteItem(item) {
              var _this = this;
-             axios.post('/deleteCar/' + car.id).then(function(response){
-                 _this.getCars();
+             axios.post('/deleteItem/' + item.id).then(function(response){
+                 _this.getItems();
              }).catch(error=>{
-                 console.log("Delete car: "+error);
+                 console.log("Delete item: "+error);
              });
          },
-         setVal(val_id, val_make, val_model) {
+         setVal(val_id, val_prod_name, val_price, val_qty) {
              this.e_id = val_id;
-             this.e_make = val_make;
-             this.e_model = val_model;
+             this.e_prod_name = val_prod_name;
+             this.e_price = val_price;
+             this.e_qty = val_qty;
          },
-         editCar: function(){
+         editItem: function(){
              var _this = this;
              var id_val_1 = document.getElementById('e_id');
-             var make_val_1 = document.getElementById('e_make');
-             var model_val_1 = document.getElementById('e_model');
+             var prod_name_val_1 = document.getElementById('e_prod_name');
+             var price_val_1 = document.getElementById('e_price');
+             var qty_val_1 = document.getElementById('e_qty');
+             var total_price_val_1 = price_val_1.value * qty_val_1.value;
              var model = document.getElementById('myModal').value;
-              axios.post('/editCars/' + id_val_1.value, {val_1: make_val_1.value, val_2: model_val_1.value})
+              axios.post('/editItem/' + id_val_1.value, {val_1: prod_name_val_1.value, val_2: price_val_1.value, val_3: qty_val_1.value, val_4: total_price_val_1})
                 .then(response => {
-                  _this.getCars();
+                  _this.getItems();
                 });
       },
      }

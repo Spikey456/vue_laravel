@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -19,7 +18,7 @@ Route::get('/', function () {
 
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-Route::post('/storeCar','CarsController@storeCar');
-Route::get('/getCars', 'CarsController@getCars');
-Route::post('/deleteCar/{id}', 'CarsController@deleteCar');
-Route::post('/editCars/{id}', 'CarsController@editCar');
+Route::post('/storeItem', 'CartController@storeItem');
+Route::get('/getItems', 'CartController@getItems');
+Route::post('/deleteItem/{id}', 'CartController@deleteItem');
+Route::post('/editItem/{id}', 'CartController@editItem');
